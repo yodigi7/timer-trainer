@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Timer from '$lib/timer.svelte';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	const modalStore = getModalStore();
 
 	let timers: any[] = [];
 	let duration = 0;
@@ -7,27 +9,61 @@
 
 	let timeout: NodeJS.Timeout | undefined;
 
-	function saveTimers() {
-		const name = prompt('What would you like to name this?');
-		if (name) {
-			let timerNames = JSON.parse(localStorage.getItem('timerTrainer-timerNames') || '["default"]');
-			timerNames.push(name);
-			localStorage.setItem('timerTrainer-timerNames', JSON.stringify(timerNames));
-			localStorage.setItem(`timerTrainer-${name}`, JSON.stringify(timers));
-			localStorage.setItem(`timerTrainer-default`, JSON.stringify(timers));
-		}
+	async function saveTimers() {
+		// Open modal to prompt for name
+		new Promise<string | false>((resolve) => {
+			const modal: ModalSettings = {
+				type: 'prompt',
+				// Data
+				title: 'Enter Timer Name',
+				body: 'What would you like to name this?',
+				value: '',
+				valueAttr: { type: 'text', required: true },
+				response: (r: string | false) => {
+					resolve(r);
+				}
+			};
+			modalStore.trigger(modal);
+		}).then((name) => {
+			if (name) {
+				_saveTimer(name);
+			}
+		});
+		// const name = prompt('What would you like to name this?');
+	}
+
+	function _saveTimer(name: string) {
+		let timerNames = JSON.parse(localStorage.getItem('timerTrainer-timerNames') || '["default"]');
+		timerNames.push(name);
+		localStorage.setItem('timerTrainer-timerNames', JSON.stringify(timerNames));
+		localStorage.setItem(`timerTrainer-${name}`, JSON.stringify(timers));
+		localStorage.setItem(`timerTrainer-default`, JSON.stringify(timers));
 	}
 
 	function loadTimers() {
-		// TODO: update to select from many options
-		const timersString = localStorage.getItem('timerTrainer-default');
-		if (timersString) {
-			clearTimers();
-			timers = JSON.parse(timersString || '[]');
-		} else {
-			alert('No default timer found!');
+		// TODO: update to select from many options modal
+		const names = JSON.parse(localStorage.getItem('timerTrainer-timerNames') || '[]');
+		if (!names.length) {
+			const modal: ModalSettings = {
+				type: 'alert',
+				title: 'No timers found!',
+				body: 'No timers found!'
+			};
+			modalStore.trigger(modal);
+			return;
 		}
-		return () => {};
+		const timersString = localStorage.getItem('timerTrainer-default');
+		if (!timersString) {
+			const modal: ModalSettings = {
+				type: 'alert',
+				title: 'No timers found!',
+				body: 'No default timer found!'
+			};
+			modalStore.trigger(modal);
+			return;
+		}
+		clearTimers();
+		timers = JSON.parse(timersString || '[]');
 	}
 
 	function deleteTimers() {
@@ -164,6 +200,6 @@
 	{#if timers.length}
 		<button class="btn variant-filled" on:click={saveTimers}>Save Timers</button>
 	{/if}
-	<button class="btn variant-filled" on:load={loadTimers} on:click={loadTimers}>Load Last Timer</button>
+	<button class="btn variant-filled" on:click={loadTimers}>Load Last Timer</button>
 	<button class="btn variant-filled" on:click={deleteTimers}>Delete All Timers</button>
 </div>
