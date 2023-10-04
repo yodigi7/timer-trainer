@@ -1,0 +1,29 @@
+{
+	"manifest_version": 2,
+	"name": "Timer Trainer",
+	"version": "0.0.1",
+	"short_name": "Timer Trainer",
+	"start_url": "/timer",
+	"description": "Custom run timer to define your own custom intervals.",
+	"author": "Anthony Buchholz",
+	"homepage_url": "https://github.com/yodigi7/timer-trainer",
+	"developer": {
+		"name": "Anthony Buchholz",
+		"url": "https://github.com/yodigi7/timer-trainer"
+	},
+	"offline_enabled": true,
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#000000",
+	"icons": [
+		{
+			"src": "/timer.png",
+			"sizes": "512x512"
+		},
+		{
+			"src": "/maskable_icon.png",
+			"sizes": "512x512",
+			"purpose": "any maskable"
+		}
+	]
+}

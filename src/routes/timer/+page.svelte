@@ -1,9 +1,44 @@
 <script lang="ts">
+	import Timer from '$lib/timer.svelte';
+
 	let timers: any[] = [];
 	let duration = 0;
 	let note = '';
 
 	let timeout: NodeJS.Timeout | undefined;
+
+	function saveTimers() {
+		const name = prompt('What would you like to name this?');
+		if (name) {
+			let timerNames = JSON.parse(localStorage.getItem('timerTrainer-timerNames') || '["default"]');
+			timerNames.push(name);
+			localStorage.setItem('timerTrainer-timerNames', JSON.stringify(timerNames));
+			localStorage.setItem(`timerTrainer-${name}`, JSON.stringify(timers));
+			localStorage.setItem(`timerTrainer-default`, JSON.stringify(timers));
+		}
+	}
+
+	function loadTimers() {
+		// TODO: update to select from many options
+		const timersString = localStorage.getItem('timerTrainer-default');
+		if (timersString) {
+			clearTimers();
+			timers = JSON.parse(timersString || '[]');
+		} else {
+			alert('No default timer found!');
+		}
+		return () => {};
+	}
+
+	function deleteTimers() {
+		// TODO: delete from one of many options
+		let timerNames: string[] = JSON.parse(localStorage.getItem('timerTrainer-timerNames') || '[]');
+		timerNames.forEach((name) => {
+			localStorage.removeItem(`timerTrainer-${name}`);
+		});
+		localStorage.removeItem('timerTrainer-timerNames');
+		localStorage.removeItem('timerTrainer-default');
+	}
 
 	function runTimersSequentially() {
 		let currentIndex = 0;
@@ -70,10 +105,7 @@
 	</form>
 	{#each timers as { duration, note }, index}
 		<div>
-			Timer: {duration}
-			{#if note}
-				- {note}
-			{/if}
+			<Timer {duration} {note} />
 			<button
 				on:click={() => {
 					timers.splice(index, 1);
@@ -129,4 +161,9 @@
 			</button>
 		</div>
 	{/each}
+	{#if timers.length}
+		<button class="btn variant-filled" on:click={saveTimers}>Save Timers</button>
+	{/if}
+	<button class="btn variant-filled" on:load={loadTimers} on:click={loadTimers}>Load Last Timer</button>
+	<button class="btn variant-filled" on:click={deleteTimers}>Delete All Timers</button>
 </div>
