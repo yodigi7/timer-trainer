@@ -139,6 +139,9 @@
 			<button class="btn variant-filled" on:click={stopTimers}>Stop Timers</button>
 		</div>
 	</form>
+	<br>
+	<hr>
+	<br>
 	{#each timers as { duration, note }, index}
 		<div>
 			<Timer {duration} {note} />
@@ -196,6 +199,7 @@
 				>
 			</button>
 		</div>
+		<br>
 	{/each}
 	{#if timers.length}
 		<button class="btn variant-filled" on:click={saveTimers}>Save Timers</button>
